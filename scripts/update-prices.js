@@ -31,7 +31,7 @@ async function runPriceUpdate() {
         const ticker = page.properties.Ticker.rich_text[0].plain_text;
 
         // fetch ADA-per-token price
-        const priceAda = await fetch(`${PRICE_API}/${tokenId}`)
+        const { priceAda } = await fetch(`${PRICE_API}/${tokenId}`)
             .then(res => {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 return res.json();
