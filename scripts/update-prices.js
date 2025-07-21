@@ -28,29 +28,32 @@ async function runPriceUpdate() {
     // 2. For each Asset, fetch price & upsert Prices row
     for (const page of assets) {
         const tokenId = page.properties['Token ID'].rich_text[0].plain_text;
-        const ticker = page.properties.Ticker.title[0].plain_text;
+        const ticker = page.properties.Ticker.rich_text[0].plain_text;
 
         // fetch ADA-per-token price
-        const { priceAda } = await fetch(`${PRICE_API}/${tokenId}`)
-            .then(r => r.json());
+        const priceAda = await fetch(`${PRICE_API}/${tokenId}`)
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            });
 
         // look for existing Price page
         const existing = await notion.databases.query({
             database_id: PRICES_DB,
             filter: {
-                property: 'Asset',
+                property: 'Token',
                 relation: { contains: page.id }
             }
         });
 
         const props = {
-            Asset: {
+            Token: {
                 relation: [{ id: page.id }]
             },
-            Price: {
+            'ADA Price': {
                 number: priceAda
             },
-            'Last Fetched': {
+            'Last Updated': {
                 date: { start: new Date().toISOString() }
             }
         };
