@@ -1,0 +1,30 @@
+name: Update Notion Prices
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # every 5 minutes
+  workflow_dispatch:      # optional manual trigger
+
+jobs:
+  update-prices:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Notion price updater
+        env:
+          NOTION_TOKEN:         ${{ secrets.NOTION_TOKEN }}
+          NOTION_ASSETS_DB_ID:  ${{ secrets.NOTION_ASSETS_DB_ID }}
+          NOTION_PRICES_DB_ID:  ${{ secrets.NOTION_PRICES_DB_ID }}
+          DEXHUNTER_PARTNER_ID: ${{ secrets.DEXHUNTER_PARTNER_ID }}
+        run: node scripts/update-prices.js
